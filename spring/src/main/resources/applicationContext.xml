@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+    <!--引入外部的配置文件-->
+    <context:property-placeholder location="classpath:db.properties" />
+
+    <!--连接池配置-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <!--set方法注入-->
+        <property name="driverClassName" value="${jdbc.driver}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+    </bean>
+
+    <!--QueryRunner-->
+    <bean id="qr" class="org.apache.commons.dbutils.QueryRunner">
+        <!--构造方法注入-->
+        <constructor-arg name="ds" ref="dataSource" />
+    </bean>
+
+    <!--
+        id: 实例在Spring容器中的唯一标识
+        class: 实例对应的类型名称（全限定名：包名+类名）
+    -->
+    <bean id="productDao" class="com.bjpowernode.dao.impl.ProductDaoImpl">
+        <property name="qr" ref="qr" />
+    </bean>
+
+    <!--set方法注入-->
+    <bean id="productService" class="com.bjpowernode.service.impl.ProductServiceImpl">
+        <!--通过property标签为productDao属性注入（赋值）一个实例
+            name：属性名，必须提供set方法
+            ref: 如果实例已经交给Spring来管理，则使用该属性进行注入，值为实例的唯一标识
+            value: 为简单类型的属性注入一个普通的值
+        -->
+        <property name="productDao" ref="productDao" />
+    </bean>
+
+    <!--构造方法注入-->
+    <!--<bean id="productService" class="com.bjpowernode.service.impl.ProductServiceImpl">
+        <constructor-arg name="productDao" ref="productDao" />
+        <constructor-arg name="username" value="lisi" />
+    </bean>-->
+</beans>
